@@ -1,4 +1,4 @@
-/./ Prisma Schema 
+// File Location: ./schema.prisma  -> Prisma Schema 
 
 generator client {
     provider = "prisma-client-js"
@@ -6,7 +6,6 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    url = env(DATABASE_URL)
 }
 
 model User {
@@ -16,11 +15,17 @@ model User {
     name        String 
     role        Role         @default(USER)
     teamId      String? 
-    Team        Team? @relation(
-                                    fields: [teamId], 
-                                    references: [id],
-                                    onDelete: SetNull
-                                )
+    Team        Team? @relation(fields: [teamId], references: [id],onDelete: SetNull)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Indexes 
+    @@index([email])
+    @@index([role])
+    @@index([teamId])
+
+    @@map("users")
 }
 
 model Team {
@@ -29,22 +34,9 @@ model Team {
     description String? 
     code        String       @unique  
     members     User[]  
+
+    @@map("teams")
 }
-
-// Timestamps 
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
-
-// Indexes 
-@@index([email])
-@@index([role])
-@@index([teamId])
-
-
-// Map 
-//@@map("users)
-//@@map("teams)
-@@map("teams)
 
 enum Role {
     ADMIN 
