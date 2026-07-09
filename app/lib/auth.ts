@@ -46,7 +46,7 @@ export const getCurrentUser = async (): Promise<User | null > => {
         });
 
         if (!userFromDb) return null;
-        const {password, ...user} = userFromDb;
+        const {password: _password, ...user} = userFromDb;
 
         return user as User;
 
