@@ -3,9 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/db";
 import { Prisma } from "@prisma/client";
-import { generateToken, hashPassword, verifyPassword } from "@/app/lib/auth";
-import { Role } from "@prisma/client";
-import { error } from "console";
+import { generateToken, verifyPassword } from "@/app/lib/auth";
 
 export async function POST(request: NextRequest) {
     try {
