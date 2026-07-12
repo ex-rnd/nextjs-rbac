@@ -1,6 +1,9 @@
 // File location: ./app/api/user/route.ts
 
 import { getCurrentUser } from "@/app/lib/auth";
+import { prisma } from "@/app/lib/db";
+import { Role } from "@/app/types";
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 
@@ -23,13 +26,59 @@ export async function GET(request: NextRequest) {
         const teamId = searchParams.get("teamId");
         const role = searchParams.get("role");
 
-        return NextResponse.json({ user, teamId, role });
+        // Build WHERE CLAUSE based on user role 
+        const where: Prisma.UserWhereInput = {};
+        if (user.role === Role.ADMIN) {
+            // Admin can see all users
+
+        }
+
+        else if (user.role === Role.MANAGER) {
+            // Manager can see users in their team or cross teams but not cross team managers
+            where.OR = [{teamId: user.teamId}, {role: Role.USER}];
+
+        }
+
+        else {
+            // Regular users can only see in their team 
+            where.teamId = user.teamId;
+            where.role = {not: Role.ADMIN}; 
+        }
+
+        // Additional Filters 
+        if (teamId) {
+            where.teamId = teamId;
+        }
+
+        if (role && Object.values(Role).includes(role as Role)) {
+            where.role = role as Role;
+        }
+
+        const users = await prisma.user.findMany({
+            where,
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                team: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+                createdAt: true,
+            },
+            orderBy: {createdAt: "desc"}
+        });
+
+        return NextResponse.json({users});
 
     } catch (error) {
-        console.error("Error :", error);
+        console.error("Get users error :", error);
         return NextResponse.json(
-            { error: "Internal server error." },
-            { status: 500 }
+            {error: "Internal server error."},
+            {status: 500}
         );
     }
 }
