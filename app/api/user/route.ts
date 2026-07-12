@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     try {
 
-        const user = getCurrentUser();
+        const user = await getCurrentUser();
 
         if (!user) {
             return NextResponse.json(
@@ -23,10 +23,16 @@ export async function GET(request: NextRequest) {
         const teamId = searchParams.get("teamId");
         const role = searchParams.get("role");
 
+        return NextResponse.json({ user, teamId, role });
+
     } catch (error) {
-        
+        console.error("Error :", error);
+        return NextResponse.json(
+            { error: "Internal server error." },
+            { status: 500 }
+        );
     }
-    
+}
 
 
 
